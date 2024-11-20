@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Slots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .slot {
+            background-color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .slot p {
+            margin: 5px 0;
+        }
+        .slot .btn {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+        }
+        .slot .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Available Slots for Appointment</h1>
+    <div id="slots-container"></div>
+</div>
+
+<script>
+    // Function to fetch available slots from the Worker endpoint
+    async function fetchAvailableSlots(date, dentistId) {
+        const url = `https://whereisdin.<your-subdomain>.workers.dev/search?date=${date}&dentist_id=${dentistId}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const slotsContainer = document.getElementById("slots-container");
+
+            if (data.available_slots && data.available_slots.length > 0) {
+                data.available_slots.forEach(slot => {
+                    const slotElement = document.createElement("div");
+                    slotElement.classList.add("slot");
+
+                    const slotDetails = `
+                        <p><strong>Slot ID:</strong> ${slot.id}</p>
+                        <p><strong>Date:</strong> ${slot.date}</p>
+                        <p><strong>Time:</strong> ${slot.time}</p>
+                        <button class="btn">Book Slot</button>
+                    `;
+                    slotElement.innerHTML = slotDetails;
+                    slotsContainer.appendChild(slotElement);
+                });
+            } else {
+                slotsContainer.innerHTML = "<p>No available slots found for the selected date.</p>";
+            }
+        } catch (error) {
+            console.error("Error fetching available slots:", error);
+        }
+    }
+
+    // Call the fetch function with example parameters (date and dentistId)
+    fetchAvailableSlots('2024-11-20', 1);
+</script>
+
+</body>
+</html>
