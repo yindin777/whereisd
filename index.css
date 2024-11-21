@@ -1,44 +1,95 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+/* Basic Reset */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
     padding: 20px;
 }
 
 h1 {
-    color: #333;
     text-align: center;
+    margin-bottom: 20px;
+    font-size: 2em;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+input[type="date"], input[type="text"] {
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#slots-container {
+    margin-top: 20px;
 }
 
 .slot {
     background-color: #fff;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
 .slot p {
     margin: 5px 0;
 }
 
-.slot .btn {
-    background-color: #007bff;
-    color: #fff;
-    padding: 10px;
+.slot button {
+    background-color: #28a745;
     border: none;
-    border-radius: 5px;
+    padding: 10px;
+    color: white;
     cursor: pointer;
-    text-align: center;
-    display: inline-block;
+    font-size: 1em;
+    border-radius: 5px;
 }
 
-.slot .btn:hover {
-    background-color: #0056b3;
+.slot button:hover {
+    background-color: #218838;
+}
+
+#slots-container p {
+    text-align: center;
+    color: #999;
 }
