@@ -49,6 +49,20 @@
 
 <div class="container">
     <h1>Available Slots for Appointment</h1>
+
+    <!-- Slot search form -->
+    <form id="slot-form">
+        <label for="date">Select Date:</label>
+        <input type="date" id="date" name="date" required>
+        <label for="dentist_id">Select Dentist:</label>
+        <select id="dentist_id" name="dentist_id" required>
+            <option value="1">Dentist 1</option>
+            <option value="2">Dentist 2</option>
+        </select>
+        <button type="submit">Search Slots</button>
+    </form>
+
+    <!-- Slots display area -->
     <div id="slots-container"></div>
 </div>
 
@@ -63,6 +77,7 @@
             const slotsContainer = document.getElementById("slots-container");
 
             if (data.available_slots && data.available_slots.length > 0) {
+                slotsContainer.innerHTML = ''; // Clear previous slots
                 data.available_slots.forEach(slot => {
                     const slotElement = document.createElement("div");
                     slotElement.classList.add("slot");
@@ -81,11 +96,17 @@
             }
         } catch (error) {
             console.error("Error fetching available slots:", error);
+            slotsContainer.innerHTML = "<p>Sorry, there was an issue fetching available slots. Please try again later.</p>";
         }
     }
 
-    // Call the fetch function with example parameters (date and dentistId)
-    fetchAvailableSlots('2024-11-20', 1);
+    // Handle form submission and fetch slots based on user input
+    document.getElementById("slot-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const date = document.getElementById("date").value;
+        const dentistId = document.getElementById("dentist_id").value;
+        fetchAvailableSlots(date, dentistId);
+    });
 </script>
 
 </body>
