@@ -3,111 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Slots</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .slot {
-            background-color: #fff;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .slot p {
-            margin: 5px 0;
-        }
-        .slot .btn {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            display: inline-block;
-        }
-        .slot .btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>Slot Booking</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the CSS file -->
 </head>
 <body>
-
-<div class="container">
-    <h1>Available Slots for Appointment</h1>
-
-    <!-- Slot search form -->
+    <h1>Book a Slot</h1>
     <form id="slot-form">
-        <label for="date">Select Date:</label>
+        <label for="date">Date:</label>
         <input type="date" id="date" name="date" required>
-        <label for="dentist_id">Select Dentist:</label>
-        <select id="dentist_id" name="dentist_id" required>
-            <option value="1">Dentist 1</option>
-            <option value="2">Dentist 2</option>
-        </select>
-        <button type="submit">Search Slots</button>
+        
+        <label for="dentist_id">Dentist ID:</label>
+        <input type="text" id="dentist_id" name="dentist_id" required>
+        
+        <button type="submit">Search Available Slots</button>
     </form>
 
-    <!-- Slots display area -->
     <div id="slots-container"></div>
-</div>
 
-<script>
-    // Function to fetch available slots from the Worker endpoint
-    async function fetchAvailableSlots(date, dentistId) {
-        const url = `https://whereisdin.<your-subdomain>.workers.dev/search?date=${date}&dentist_id=${dentistId}`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
+    <script>
+        // Handle form submission and fetch slots based on user input
+        document.getElementById("slot-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const date = document.getElementById("date").value;
+            const dentistId = document.getElementById("dentist_id").value;
+            fetchAvailableSlots(date, dentistId);
+        });
 
-            const slotsContainer = document.getElementById("slots-container");
+        // Function to fetch available slots
+        async function fetchAvailableSlots(date, dentistId) {
+            const url = `https://whereisd.yindin777.workers.dev/search?date=${date}&dentist_id=${dentistId}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
 
-            if (data.available_slots && data.available_slots.length > 0) {
-                slotsContainer.innerHTML = ''; // Clear previous slots
-                data.available_slots.forEach(slot => {
-                    const slotElement = document.createElement("div");
-                    slotElement.classList.add("slot");
+                const slotsContainer = document.getElementById("slots-container");
 
-                    const slotDetails = `
-                        <p><strong>Slot ID:</strong> ${slot.id}</p>
-                        <p><strong>Date:</strong> ${slot.date}</p>
-                        <p><strong>Time:</strong> ${slot.time}</p>
-                        <button class="btn">Book Slot</button>
-                    `;
-                    slotElement.innerHTML = slotDetails;
-                    slotsContainer.appendChild(slotElement);
-                });
-            } else {
-                slotsContainer.innerHTML = "<p>No available slots found for the selected date.</p>";
+                if (data.available_slots && data.available_slots.length > 0) {
+                    slotsContainer.innerHTML = ''; // Clear previous slots
+                    data.available_slots.forEach(slot => {
+                        const slotElement = document.createElement("div");
+                        slotElement.classList.add("slot");
+
+                        const slotDetails = `
+                            <p><strong>Slot ID:</strong> ${slot.id}</p>
+                            <p><strong>Date:</strong> ${slot.date}</p>
+                            <p><strong>Time:</strong> ${slot.time}</p>
+                            <button class="btn" data-slot-id="${slot.id}">Book Slot</button>
+                        `;
+                        slotElement.innerHTML = slotDetails;
+                        slotsContainer.appendChild(slotElement);
+
+                        // Add event listener for booking the slot
+                        slotElement.querySelector('.btn').addEventListener('click', function() {
+                            bookSlot(slot.id);  // Call bookSlot function when button is clicked
+                        });
+                    });
+                } else {
+                    slotsContainer.innerHTML = "<p>No available slots found for the selected date.</p>";
+                }
+            } catch (error) {
+                console.error("Error fetching available slots:", error);
+                slotsContainer.innerHTML = "<p>Sorry, there was an issue fetching available slots. Please try again later.</p>";
             }
-        } catch (error) {
-            console.error("Error fetching available slots:", error);
-            slotsContainer.innerHTML = "<p>Sorry, there was an issue fetching available slots. Please try again later.</p>";
         }
-    }
 
-    // Handle form submission and fetch slots based on user input
-    document.getElementById("slot-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const date = document.getElementById("date").value;
-        const dentistId = document.getElementById("dentist_id").value;
-        fetchAvailableSlots(date, dentistId);
-    });
-</script>
+        // Function to book the selected slot
+        async function bookSlot(slotId) {
+            const url = `https://whereisd.yindin777.workers.dev/book?slot_id=${slotId}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
 
+                if (data.success) {
+                    alert('Slot booked successfully!');
+                } else {
+                    alert('Error booking slot: ' + (data.message || 'Unknown error.'));
+                }
+            } catch (error) {
+                console.error('Error booking slot:', error);
+                alert('There was an error booking the slot. Please try again.');
+            }
+        }
+    </script>
 </body>
 </html>
