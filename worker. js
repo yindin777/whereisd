@@ -1,63 +1,59 @@
-// Handle form submission and fetch slots based on user input
-document.getElementById("slot-form").addEventListener("submit", function(event) {
-    event.preventDefault();
-    const date = document.getElementById("date").value;
-    const dentistId = document.getElementById("dentist_id").value;
-    fetchAvailableSlots(date, dentistId);
+const D1 = await D1Database.open('whereisd1');
+
+// Fetch available slots based on date and dentist ID
+async function handleSearch(req) {
+    const { date, dentist_id } = req.query;
+    const sql = `
+        SELECT * FROM slots
+        WHERE dentist_id = ? AND date = ?
+        ORDER BY time
+    `;
+    
+    const { rows } = await D1.prepare(sql).bind(dentist_id, date).all();
+
+    if (rows.length > 0) {
+        return new Response(JSON.stringify({
+            available_slots: rows
+        }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } else {
+        return new Response(JSON.stringify({ available_slots: [] }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+// Book a slot
+async function handleBook(req) {
+    const { slot_id } = req.query;
+    const sql = `
+        UPDATE slots
+        SET status = 'booked'
+        WHERE id = ?
+    `;
+    
+    const result = await D1.prepare(sql).bind(slot_id).run();
+
+    if (result.success) {
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } else {
+        return new Response(JSON.stringify({ success: false, message: 'Unable to book slot' }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+// Handle requests
+addEventListener('fetch', event => {
+    const url = new URL(event.request.url);
+    if (url.pathname === '/search') {
+        event.respondWith(handleSearch(event.request));
+    } else if (url.pathname === '/book') {
+        event.respondWith(handleBook(event.request));
+    } else {
+        event.respondWith(new Response('Not Found', { status: 404 }));
+    }
 });
-
-// Function to fetch available slots
-async function fetchAvailableSlots(date, dentistId) {
-    const url = `https://whereisdin.<your-subdomain>.workers.dev/search?date=${date}&dentist_id=${dentistId}`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const slotsContainer = document.getElementById("slots-container");
-
-        if (data.available_slots && data.available_slots.length > 0) {
-            slotsContainer.innerHTML = ''; // Clear previous slots
-            data.available_slots.forEach(slot => {
-                const slotElement = document.createElement("div");
-                slotElement.classList.add("slot");
-
-                const slotDetails = `
-                    <p><strong>Slot ID:</strong> ${slot.id}</p>
-                    <p><strong>Date:</strong> ${slot.date}</p>
-                    <p><strong>Time:</strong> ${slot.time}</p>
-                    <button class="btn" data-slot-id="${slot.id}">Book Slot</button>
-                `;
-                slotElement.innerHTML = slotDetails;
-                slotsContainer.appendChild(slotElement);
-
-                // Add event listener for booking the slot
-                slotElement.querySelector('.btn').addEventListener('click', function() {
-                    bookSlot(slot.id);  // Call bookSlot function when button is clicked
-                });
-            });
-        } else {
-            slotsContainer.innerHTML = "<p>No available slots found for the selected date.</p>";
-        }
-    } catch (error) {
-        console.error("Error fetching available slots:", error);
-        slotsContainer.innerHTML = "<p>Sorry, there was an issue fetching available slots. Please try again later.</p>";
-    }
-}
-
-// Function to book the selected slot
-async function bookSlot(slotId) {
-    const url = `https://whereisdin.<your-subdomain>.workers.dev/book?slot_id=${slotId}`;
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.success) {
-            alert('Slot booked successfully!');
-        } else {
-            alert('Error booking slot: ' + (data.message || 'Unknown error.'));
-        }
-    } catch (error) {
-        console.error('Error booking slot:', error);
-        alert('There was an error booking the slot. Please try again.');
-    }
-}
