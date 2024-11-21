@@ -7,8 +7,11 @@ export default {
     if (path.startsWith("/search")) {
       const { date, dentist_id } = Object.fromEntries(new URLSearchParams(url.search));
 
-      // Query the database for available slots (dummy data for now)
-      const slots = await env.DATABASE.prepare(`SELECT id, date, time FROM Appointments WHERE date = ? AND dentist_id = ? AND is_booked = 0`)
+      // Query the database for available slots (including new columns patient_name and confirmed)
+      const slots = await env.DATABASE.prepare(`
+        SELECT id, date, time, professional_id, patient_name, confirmed 
+        FROM Appointments 
+        WHERE date = ? AND professional_id = ? AND is_booked = 0`)
         .bind(date, dentist_id)
         .all();
 
