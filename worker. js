@@ -3,6 +3,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // Handle slot search
     if (path.startsWith("/search")) {
       const { date, dentist_id } = Object.fromEntries(new URLSearchParams(url.search));
 
@@ -24,6 +25,42 @@ export default {
           });
         }
       } catch (error) {
+        return new Response("Internal Server Error", { status: 500 });
+      }
+    }
+
+    // Handle slot booking
+    if (path.startsWith("/book")) {
+      const { slot_id } = Object.fromEntries(new URLSearchParams(url.search));
+
+      if (!slot_id) {
+        return new Response(JSON.stringify({ success: false, message: "Missing slot_id" }), {
+          headers: { "Content-Type": "application/json" },
+          status: 400,
+        });
+      }
+
+      try {
+        // Update the appointment slot to mark it as booked
+        const result = await env.DATABASE.prepare(`
+          UPDATE Appointments 
+          SET is_booked = 1 
+          WHERE id = ?`)
+          .bind(slot_id)
+          .run();
+
+        if (result.changes > 0) {
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { "Content-Type": "application/json" },
+          });
+        } else {
+          return new Response(JSON.stringify({ success: false, message: "Slot not found or already booked." }), {
+            headers: { "Content-Type": "application/json" },
+            status: 404,
+          });
+        }
+      } catch (error) {
+        console.error("Error booking slot:", error); // Log the error for debugging
         return new Response("Internal Server Error", { status: 500 });
       }
     }
