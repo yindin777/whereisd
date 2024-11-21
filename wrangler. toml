@@ -1,14 +1,18 @@
-name = "whereis-api"  # The name of your worker
-type = "javascript"   # Type of Worker (could also be "webpack" for more advanced setups)
+name = "whereis-database-worker"
+type = "javascript"
 
-[env.production]  # Defines the production environment
-workers_dev = true  # Use workers_dev=true to deploy without needing to purchase a domain (for dev purposes)
-route = ""  # Leave blank if deploying to workers.dev subdomain, or set the domain route for production deployment
-account_id = "your_account_id"  # Your Cloudflare account ID
-zone_id = "your_zone_id"  # Your Cloudflare zone ID, if using a custom domain
-kv_namespaces = [
-  { binding = "DATABASE", id = "your_kv_namespace_id" }
-]  # If using KV (Key-Value storage), bind your KV namespace
+# The main entry point to your worker
+main = "worker.js"
 
-[build]  # Define how your code is bundled
-command = "npm install"  # Or any other build command if needed
+# The environment variables for the worker
+[env.production]
+vars = { D1 = "whereisd1" }
+
+[build]
+  command = "npm install"
+
+[workers_dev]
+  # Enable workers_dev to use the worker in a preview environment
+  account_id = "your-account-id"
+  route = "https://whereisd.yindin777.workers.dev/*"
+  zone_id = "your-zone-id"
